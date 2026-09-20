@@ -4,11 +4,11 @@ public class SeasonSchedule {
     public static final int MATCHES_PER_ROUND = 6;
 
     private Team[] teams;
-    private Fixture[][] schedule;
+    private Fixture[][] rounds;
 
     public SeasonSchedule(Team[] teams) {
         this.teams = teams;
-        schedule = new Fixture[TOTAL_ROUNDS][MATCHES_PER_ROUND];
+        rounds = new Fixture[TOTAL_ROUNDS][MATCHES_PER_ROUND];
         createSchedule();
     }
 
@@ -22,74 +22,147 @@ public class SeasonSchedule {
         for (int round = 0; round < 11; round++) {
             for (int match = 0; match < MATCHES_PER_ROUND; match++) {
                 Team first = rotation[match];
-                Team second = rotation[teams.length - 1 - match];
+                Team second = rotation[rotation.length - 1 - match];
 
                 if ((round + match) % 2 == 0) {
-                    schedule[round][match] = new Fixture(first, second);
+                    rounds[round][match] = new Fixture(
+                            first,
+                            second
+                    );
                 } else {
-                    schedule[round][match] = new Fixture(second, first);
+                    rounds[round][match] = new Fixture(
+                            second,
+                            first
+                    );
                 }
             }
 
-            Team last = rotation[rotation.length - 1];
-            for (int i = rotation.length - 1; i >= 2; i--) {
-                rotation[i] = rotation[i - 1];
-            }
-            rotation[1] = last;
+            rotateTeams(rotation);
         }
 
         for (int round = 11; round < TOTAL_ROUNDS; round++) {
-            int sourceRound = round - 11;
+            int originalRound = round - 11;
 
             for (int match = 0; match < MATCHES_PER_ROUND; match++) {
-                Fixture source = schedule[sourceRound][match];
-                schedule[round][match] = new Fixture(source.getAwayTeam(), source.getHomeTeam());
+                Fixture originalFixture =
+                        rounds[originalRound][match];
+
+                rounds[round][match] = new Fixture(
+                        originalFixture.getAwayTeam(),
+                        originalFixture.getHomeTeam()
+                );
             }
         }
     }
 
-    public Fixture getFixture(int round, int match) {
-        if (round < 0 || round >= TOTAL_ROUNDS || match < 0 || match >= MATCHES_PER_ROUND) {
-            return null;
+    private void rotateTeams(Team[] rotation) {
+        Team last = rotation[rotation.length - 1];
+
+        for (int i = rotation.length - 1; i > 1; i--) {
+            rotation[i] = rotation[i - 1];
         }
-        return schedule[round][match];
+
+        rotation[1] = last;
     }
 
-    public Fixture[] getRound(int round) {
-        if (round < 0 || round >= TOTAL_ROUNDS) {
+    public Fixture getFixture(
+            int roundIndex,
+            int matchIndex) {
+
+        if (roundIndex < 0
+                || roundIndex >= TOTAL_ROUNDS) {
+
             return null;
         }
 
-        Fixture[] copy = new Fixture[MATCHES_PER_ROUND];
-        for (int i = 0; i < MATCHES_PER_ROUND; i++) {
-            copy[i] = schedule[round][i];
+        if (matchIndex < 0
+                || matchIndex >= MATCHES_PER_ROUND) {
+
+            return null;
         }
-        return copy;
+
+        return rounds[roundIndex][matchIndex];
     }
 
-    public Fixture getTeamFixture(int round, Team team) {
-        if (round < 0 || round >= TOTAL_ROUNDS || team == null) {
+    public Fixture[] getRound(int roundIndex) {
+        if (roundIndex < 0
+                || roundIndex >= TOTAL_ROUNDS) {
+
             return null;
         }
 
-        for (int i = 0; i < MATCHES_PER_ROUND; i++) {
-            if (schedule[round][i].containsTeam(team)) {
-                return schedule[round][i];
+        Fixture[] result =
+                new Fixture[MATCHES_PER_ROUND];
+
+        for (int i = 0;
+             i < MATCHES_PER_ROUND;
+             i++) {
+
+            result[i] =
+                    rounds[roundIndex][i];
+        }
+
+        return result;
+    }
+
+    public Fixture getTeamFixture(
+            int roundIndex,
+            Team team) {
+
+        if (roundIndex < 0
+                || roundIndex >= TOTAL_ROUNDS
+                || team == null) {
+
+            return null;
+        }
+
+        for (int i = 0;
+             i < MATCHES_PER_ROUND;
+             i++) {
+
+            if (rounds[roundIndex][i]
+                    .containsTeam(team)) {
+
+                return rounds[roundIndex][i];
             }
         }
 
         return null;
     }
 
-    public String getRoundText(int round) {
-        if (round < 0 || round >= TOTAL_ROUNDS) {
-            return "Invalid round";
+    public String getRoundText(int roundIndex) {
+        if (roundIndex < 0
+                || roundIndex >= TOTAL_ROUNDS) {
+
+            return "Invalid round.";
         }
 
-        String text = "ROUND " + (round + 1) + "\n";
+        String text =
+                "ROUND "
+                        + (roundIndex + 1)
+                        + "\n";
 
-        for (int i = 0; i < MATCHES_PER_ROUND; i++) {
-            text += schedule[round][i].getFixtureText() + "\n";
+        for (int i = 0;
+             i < MATCHES_PER_ROUND;
+             i++) {
+
+            text += rounds[roundIndex][i]
+                    .getFixtureText()
+                    + "\n";
+        }
+
+        return text;
+    }
+
+    public String getFullScheduleText() {
+        String text = "";
+
+        for (int round = 0;
+             round < TOTAL_ROUNDS;
+             round++) {
+
+            text += getRoundText(round)
+                    + "\n";
         }
 
         return text;

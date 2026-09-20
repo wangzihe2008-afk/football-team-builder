@@ -17,16 +17,24 @@ public class Fixture {
     }
 
     public boolean containsTeam(Team team) {
-        return homeTeam == team || awayTeam == team;
+        return team == homeTeam || team == awayTeam;
     }
 
     public Team getOpponent(Team team) {
-        if (homeTeam == team) return awayTeam;
-        if (awayTeam == team) return homeTeam;
+        if (team == homeTeam) {
+            return awayTeam;
+        }
+
+        if (team == awayTeam) {
+            return homeTeam;
+        }
+
         return null;
     }
 
     public String getFixtureText() {
-        return homeTeam.getName() + " vs " + awayTeam.getName();
+        return homeTeam.getName()
+                + " vs "
+                + awayTeam.getName();
     }
 }

@@ -7,14 +7,15 @@ public class PlayerStatistics {
     }
 
     public Player[] getAllPlayers() {
-        Player[] players = new Player[teams.length * 11];
+        Player[] players = new Player[teams.length * Team.POSITIONS.length];
         int index = 0;
 
         for (int i = 0; i < teams.length; i++) {
             Player[] lineup = teams[i].getLineup();
 
             for (int j = 0; j < lineup.length; j++) {
-                players[index++] = lineup[j];
+                players[index] = lineup[j];
+                index++;
             }
         }
 
@@ -41,6 +42,7 @@ public class PlayerStatistics {
         if (first.getSeasonGoals() != second.getSeasonGoals()) {
             return first.getSeasonGoals() < second.getSeasonGoals();
         }
+
         return first.getSeasonAssists() < second.getSeasonAssists();
     }
 
@@ -64,6 +66,7 @@ public class PlayerStatistics {
         if (first.getSeasonAssists() != second.getSeasonAssists()) {
             return first.getSeasonAssists() < second.getSeasonAssists();
         }
+
         return first.getSeasonGoals() < second.getSeasonGoals();
     }
 
@@ -85,49 +88,71 @@ public class PlayerStatistics {
         return null;
     }
 
-    private String displayName(Player player) {
-        return player.isCustomPlayer() ? "⭐ " + player.getName() : player.getName();
+    private String getDisplayName(Player player) {
+        if (player.isCustomPlayer()) {
+            return "⭐ " + player.getName();
+        }
+
+        return player.getName();
     }
 
-    public String getTopScorersText(int amount) {
+    public String getTopScorersText(int limit) {
         Player[] players = getPlayersByGoals();
-        int limit = Math.min(amount, players.length);
 
-        String text = String.format("%-4s %-24s %-22s %6s %7s%n",
-                "#", "PLAYER", "TEAM", "GOALS", "ASSISTS");
-        text += "---------------------------------------------------------------------\n";
+        String text = String.format(
+                "%-4s %-26s %-22s %5s %7s%n",
+                "#", "PLAYER", "TEAM", "GOALS", "ASSISTS"
+        );
 
-        for (int i = 0; i < limit; i++) {
-            Team team = getPlayerTeam(players[i]);
-            text += String.format("%-4d %-24s %-22s %6d %7d%n",
+        int amount = Math.min(limit, players.length);
+
+        for (int i = 0; i < amount; i++) {
+            Player player = players[i];
+            Team team = getPlayerTeam(player);
+
+            String teamName = team == null
+                    ? "Unknown"
+                    : team.getName();
+
+            text += String.format(
+                    "%-4d %-26s %-22s %5d %7d%n",
                     i + 1,
-                    displayName(players[i]),
-                    team == null ? "Unknown" : team.getName(),
-                    players[i].getSeasonGoals(),
-                    players[i].getSeasonAssists());
+                    getDisplayName(player),
+                    teamName,
+                    player.getSeasonGoals(),
+                    player.getSeasonAssists()
+            );
         }
 
         return text;
     }
 
-    public String getTopAssistsText(int amount) {
+    public String getTopAssistsText(int limit) {
         Player[] players = getPlayersByAssists();
-        int limit = Math.min(amount, players.length);
 
-        String text = String.format("%-4s %-24s %-22s %7s %6s%n",
-                "#", "PLAYER", "TEAM", "ASSISTS", "GOALS");
-        text += "---------------------------------------------------------------------\n";
+        String text = String.format(
+                "%-4s %-26s %-22s %7s %5s%n",
+                "#", "PLAYER", "TEAM", "ASSISTS", "GOALS"
+        );
 
-        for (int i = 0; i < limit; i++) {
-            Team team = getPlayerTeam(players[i]);
-            text += String.format("%-4d %-24s %-22s %7d %6d%n",
+        int amount = Math.min(limit, players.length);
+
+        for (int i = 0; i < amount; i++) {
+            Player player = players[i];
+            Team team = getPlayerTeam(player);
+
+            String teamName = team == null
+                    ? "Unknown"
+                    : team.getName();
+
+            text += String.format(
+                    "%-4d %-26s %-22s %7d %5d%n",
                     i + 1,
-                    displayName(players[i]),
-                    team == null ? "Unknown" : team.getName(),
-                    players[i].getSeasonAssists(),
-                    players[i].getSeasonGoals());
-        }
-
-        return text;
+                    getDisplayName(player),
+                    teamName,
+                    player.getSeasonAssists(),
+                    player.getSeasonGoals()
+            );
+        }return text;
     }
 }

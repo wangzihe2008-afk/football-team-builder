@@ -39,11 +39,7 @@ public class LeagueTable {
             return first.getGoalsFor() < second.getGoalsFor();
         }
 
-        if (first.getWins() != second.getWins()) {
-            return first.getWins() < second.getWins();
-        }
-
-        return false;
+        return first.getWins() < second.getWins();
     }
 
     public int getTeamPosition(Team team) {
@@ -64,31 +60,37 @@ public class LeagueTable {
 
     public Team getLeader() {
         Team[] standings = getStandings();
-        return standings.length == 0 ? null : standings[0];
+
+        if (standings.length == 0) {
+            return null;
+        }
+
+        return standings[0];
     }
 
     public String getTableText() {
         Team[] standings = getStandings();
 
-        String text = String.format("%-4s %-24s %3s %3s %3s %3s %4s %4s %4s %4s%n",
-                "POS", "TEAM", "P", "W", "D", "L", "GF", "GA", "GD", "PTS");
-        text += "----------------------------------------------------------------------------\n";
+        String text = String.format(
+                "%-4s %-24s %3s %3s %3s %4s %4s %4s %4s%n",
+                "POS", "TEAM", "W", "D", "L", "GF", "GA", "GD", "PTS"
+        );
 
         for (int i = 0; i < standings.length; i++) {
             Team team = standings[i];
-            int played = team.getWins() + team.getDraws() + team.getLosses();
 
-            text += String.format("%-4d %-24s %3d %3d %3d %3d %4d %4d %4d %4d%n",
+            text += String.format(
+                    "%-4d %-24s %3d %3d %3d %4d %4d %4d %4d%n",
                     i + 1,
                     team.getName(),
-                    played,
                     team.getWins(),
                     team.getDraws(),
                     team.getLosses(),
                     team.getGoalsFor(),
                     team.getGoalsAgainst(),
                     team.getGoalDifference(),
-                    team.getPoints());
+                    team.getPoints()
+            );
         }
 
         return text;
